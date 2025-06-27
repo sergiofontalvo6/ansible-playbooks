@@ -1,6 +1,6 @@
 -name: Prueba de ping con Ansible
-   hosts: all
-   gather_facts: false
-   tasks:
-     - name: Hacer ping al host
-       ansible.builtin.ping:
+ hosts: all
+ gather_facts: false
+ tasks:
+   - name: Hacer ping al host
+     ansible.builtin.ping:
