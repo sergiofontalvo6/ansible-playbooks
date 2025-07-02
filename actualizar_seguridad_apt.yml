@@ -2,15 +2,22 @@
   hosts: all
   become: yes
   become_method: sudo
-  command: whoami
-  register: resultado
-  changed_when: false
-- debug:
-    var: resultado.stdout
+
   vars:
     instalar_actualizaciones: false  # Cambiar a true o usar --extra-vars
 
   tasks:
+
+    - name: verificar sudo
+      become: yes
+      command: whoami
+      register: resultado_whoami
+      changed_when: false
+
+    - name: resultado whoami
+      debug:
+        var: resultado_whoami.stdout
+
     - name: Actualizar lista de paquetes
       apt:
         update_cache: yes
