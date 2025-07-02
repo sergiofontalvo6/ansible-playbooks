@@ -1,6 +1,7 @@
 - name: Actualización de seguridad en Ubuntu Server
   hosts: all
   become: yes
+  become_method: sudo
   vars:
     instalar_actualizaciones: false  # Cambiar a true o usar --extra-vars
 
