@@ -1,0 +1,25 @@
+- name: Actualización de seguridad en Ubuntu Server
+  hosts: all
+  become: yes
+  vars:
+    instalar_actualizaciones: false  # Cambiar a true o usar --extra-vars
+
+  tasks:
+    - name: Actualizar lista de paquetes
+      apt:
+        update_cache: yes
+
+    - name: Verificar actualizaciones de seguridad disponibles
+      shell: |
+        unattended-upgrade --dry-run -d | grep -E '^Inst.*security' || echo "No hay actualizaciones de seguridad"
+      register: actualizaciones
+      changed_when: false
+
+    - name: Mostrar actualizaciones de seguridad encontradas
+      debug:
+        var: actualizaciones.stdout_lines
+
+    - name: Instalar actualizaciones de seguridad si está habilitado
+      apt:
+        upgrade: dist
+      when: instalar_actualizaciones | bool
