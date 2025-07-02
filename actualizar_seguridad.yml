@@ -1,0 +1,24 @@
+- name: Actualización de seguridad en servidores
+  hosts: all
+  become: yes
+  vars:
+    instalar_actualizaciones: false
+
+  tasks:
+
+    - name: Mostrar actualizaciones de seguridad disponibles (RedHat, AlmaLinux, CentOS)
+      shell: yum updateinfo list security
+      register: actualizaciones
+      changed_when: false
+
+    - name: Mostrar en pantalla las actualizaciones encontradas
+      debug:
+        var: actualizaciones.stdout_lines
+
+    - name: Instalar actualizaciones de seguridad si se habilita la variable
+      yum:
+        security: yes
+        name: '*'
+        state: latest
+      when: instalar_actualizaciones | bool
+
