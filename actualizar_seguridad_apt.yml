@@ -2,6 +2,11 @@
   hosts: all
   become: yes
   become_method: sudo
+  command: whoami
+  register: resultado
+  changed_when: false
+- debug:
+    var: resultado.stdout
   vars:
     instalar_actualizaciones: false  # Cambiar a true o usar --extra-vars
 
