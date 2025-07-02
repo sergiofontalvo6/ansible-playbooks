@@ -10,6 +10,7 @@
 
     - name: Verificar privilegios sudo
       become: yes
+      become_user: root
       command: whoami
       register: resultado_whoami
       changed_when: false
