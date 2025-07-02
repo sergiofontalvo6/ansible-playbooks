@@ -2,37 +2,55 @@
   hosts: all
   become: yes
   become_method: sudo
-
+  gather_facts: yes
   vars:
-    instalar_actualizaciones: false  # Cambiar a true o usar --extra-vars
+    instalar_actualizaciones: false  # puedes sobreescribir esto desde AWX o CLI
 
   tasks:
 
-    - name: verificar sudo
+    - name: Verificar privilegios sudo
       become: yes
       command: whoami
       register: resultado_whoami
       changed_when: false
 
-    - name: resultado whoami
+    - name: Mostrar resultado del whoami
       debug:
         var: resultado_whoami.stdout
 
-    - name: Actualizar lista de paquetes
+    - name: Actualizar la lista de paquetes APT
+      become: yes
       apt:
         update_cache: yes
 
     - name: Verificar actualizaciones de seguridad disponibles
+      become: yes
       shell: |
         unattended-upgrade --dry-run -d | grep -E '^Inst.*security' || echo "No hay actualizaciones de seguridad"
       register: actualizaciones
       changed_when: false
 
-    - name: Mostrar actualizaciones de seguridad encontradas
+    - name: Mostrar actualizaciones encontradas
       debug:
         var: actualizaciones.stdout_lines
 
-    - name: Instalar actualizaciones de seguridad si está habilitado
-      apt:
-        upgrade: dist
+    - name: Instalar actualizaciones de seguridad si se ha solicitado
+      become: yes
+      shell: unattended-upgrade -d
       when: instalar_actualizaciones | bool
+
+    - name: Verificar si se requiere reinicio
+      become: yes
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_flag
+
+    - name: Informar si el sistema requiere reinicio
+      debug:
+        msg: "El sistema requiere reinicio."
+      when: reboot_flag.stat.exists
+
+    - name: Informar si NO requiere reinicio
+      debug:
+        msg: "No se requiere reinicio."
+      when: not reboot_flag.stat.exists
