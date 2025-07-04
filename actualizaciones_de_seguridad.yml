@@ -1,6 +1,6 @@
 ---
 - name: Verificar y aplicar actualizaciones de seguridad (Ubuntu y AlmaLinux)
-  hosts: servidores
+  hosts: all
   become: true
   gather_facts: yes
 
