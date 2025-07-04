@@ -32,7 +32,7 @@
 
     - name: Mostrar actualizaciones pendientes en Ubuntu
       debug:
-        msg: "{{ ubuntu_security_updates.stdout_lines }}"
+        msg: "{{ ubuntu_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
       when: ansible_facts['os_family'] == "Debian"
 
     - name: Aplicar actualizaciones de seguridad en Ubuntu
@@ -74,7 +74,7 @@
 
     - name: Actualizaciones pendientes
       debug:
-        msg: "{{ almalinux_security_updates.stdout_lines }}"
+        msg: "{{ almalinux_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
       when: ansible_facts['os_family'] == "RedHat"
 
     - name: Aplicar actualizaciones de seguridad
