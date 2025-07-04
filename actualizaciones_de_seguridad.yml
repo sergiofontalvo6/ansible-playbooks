@@ -25,7 +25,7 @@
     # Ubuntu
     # --------------------
     - name: Verificar actualizaciones de seguridad en Ubuntu
-      shell: unattended-upgrade --dry-run -d | grep -E '^Inst.*security'
+      shell: apt list --upgradable 2>/dev/null
       register: ubuntu_security_updates
       changed_when: false
       when: ansible_facts['os_family'] == "Debian"
@@ -43,20 +43,20 @@
         - ansible_facts['os_family'] == "Debian"
         - instalar_actualizaciones_ubuntu == "si"
 
-    - name: Verificar si Ubuntu requiere reinicio
+    - name: Requiere reinicio
       stat:
         path: /var/run/reboot-required
       register: ubuntu_reboot_check
       when: ansible_facts['os_family'] == "Debian"
 
-    - name: Mostrar si Ubuntu requiere reinicio
+    - name: Requiere reinicio
       debug:
-        msg: "🔁 Ubuntu requiere reinicio"
+        msg: "Ubuntu requiere reinicio"
       when:
         - ansible_facts['os_family'] == "Debian"
         - ubuntu_reboot_check.stat.exists
 
-    - name: Mostrar si Ubuntu no requiere reinicio
+    - name: Requiere reinicio
       debug:
         msg: "Ubuntu no requiere reinicio"
       when:
@@ -67,17 +67,17 @@
     # AlmaLinux
     # --------------------
     - name: Verificar actualizaciones de seguridad en AlmaLinux
-      shell: dnf updateinfo list security
+      shell: dnf makecache --refresh && dnf updateinfo list security
       register: almalinux_security_updates
       changed_when: false
       when: ansible_facts['os_family'] == "RedHat"
 
-    - name: Mostrar actualizaciones pendientes en AlmaLinux
+    - name: Actualizaciones pendientes
       debug:
         msg: "{{ almalinux_security_updates.stdout_lines }}"
       when: ansible_facts['os_family'] == "RedHat"
 
-    - name: Aplicar actualizaciones de seguridad en AlmaLinux
+    - name: Aplicar actualizaciones de seguridad
       shell: dnf update --security -y
       when:
         - ansible_facts['os_family'] == "RedHat"
@@ -89,14 +89,14 @@
       changed_when: false
       when: ansible_facts['os_family'] == "RedHat"
 
-    - name: Mostrar si AlmaLinux requiere reinicio
+    - name: Requiere reinicio
       debug:
-        msg: "🔁 AlmaLinux requiere reinicio"
+        msg: "AlmaLinux requiere reinicio"
       when:
         - ansible_facts['os_family'] == "RedHat"
         - almalinux_reboot_check.stdout != "0"
 
-    - name: Mostrar si AlmaLinux no requiere reinicio
+    - name: Requiere reinicio
       debug:
         msg: "AlmaLinux no requiere reinicio"
       when:
