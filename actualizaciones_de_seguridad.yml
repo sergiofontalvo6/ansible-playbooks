@@ -29,11 +29,14 @@
       register: ubuntu_security_updates
       changed_when: false
       when: ansible_facts['os_family'] == "Debian"
-
-    - name: Mostrar actualizaciones pendientes en Ubuntu
+      
+    - name: Actualizaciones pendientes
+      set_fact:
+          resumen_almalinux: "{{ ubuntu_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
+    - name: Mostrar resumen
       debug:
-        msg: "{{ ubuntu_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
-      when: ansible_facts['os_family'] == "Debian"
+        msg: "Se Encontraron {{ resumen_almalinux | length }} actualizaciones de seguridad."
+
 
     - name: Aplicar actualizaciones de seguridad en Ubuntu
       apt:
@@ -73,10 +76,12 @@
       when: ansible_facts['os_family'] == "RedHat"
 
     - name: Actualizaciones pendientes
+      set_fact:
+        resumen_almalinux: "{{ almalinux_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
+    - name: Mostrar resumen
       debug:
-        msg: "{{ almalinux_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
-      when: ansible_facts['os_family'] == "RedHat"
-
+        msg: "Se Encontraron {{ resumen_almalinux | length }} actualizaciones de seguridad."
+  
     - name: Aplicar actualizaciones de seguridad
       shell: dnf update --security -y
       when:
