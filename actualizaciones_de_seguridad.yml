@@ -30,14 +30,20 @@
       changed_when: false
       when: ansible_facts['os_family'] == "Debian"
       
-    - name: Actualizaciones pendientes
+    - name: Guardar resumen de actualizaciones
       set_fact:
-          resumen_almalinux: "{{ ubuntu_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
-    - name: Mostrar resumen
-      debug:
-        msg: "Se Encontraron {{ resumen_almalinux | length }} actualizaciones de seguridad."
+        resumen_ubuntu: "{{ ubuntu_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
       when: ansible_facts['os_family'] == "Debian"
 
+    - name: Mostrar resumen de actualizaciones de seguridad (máx. 10 líneas)
+      debug:
+        msg: "{{ resumen_ubuntu[:10] }}"
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Confirmar finalización del análisis
+      debug:
+        msg: "Verificación de actualizaciones de seguridad en Ubuntu terminada."
+      when: ansible_facts['os_family'] == "Debian"
     - name: Aplicar actualizaciones de seguridad en Ubuntu
       apt:
         upgrade: dist
