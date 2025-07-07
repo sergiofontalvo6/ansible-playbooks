@@ -30,14 +30,14 @@
       changed_when: false
       when: ansible_facts['os_family'] == "Debian"
       
-   -  name: Mostrar resumen de actualizaciones de seguridad en Ubuntu
+    - name: Mostrar resumen de actualizaciones de seguridad en Ubuntu
       debug:
         msg: >-
           {% if ubuntu_security_updates.stdout_lines | length > 0 %}
-           Se encontraron {{ ubuntu_security_updates.stdout_lines | length }} actualizaciones de seguridad:
-           {{ ubuntu_security_updates.stdout_lines[:10] }}
+          Se encontraron {{ ubuntu_security_updates.stdout_lines | length }} actualizaciones de seguridad:
+          {{ ubuntu_security_updates.stdout_lines[:10] }}
           {% else %}
-             No se encontraron actualizaciones de seguridad en Ubuntu.
+          No se encontraron actualizaciones de seguridad en Ubuntu.
           {% endif %}
       when: ansible_facts['os_family'] == "Debian"
 
