@@ -36,7 +36,7 @@
     - name: Mostrar resumen
       debug:
         msg: "Se Encontraron {{ resumen_almalinux | length }} actualizaciones de seguridad."
-
+      when: ansible_facts['os_family'] == "Debian"
 
     - name: Aplicar actualizaciones de seguridad en Ubuntu
       apt:
@@ -69,18 +69,39 @@
     # --------------------
     # AlmaLinux
     # --------------------
-    - name: Verificar actualizaciones de seguridad en AlmaLinux
-      shell: dnf makecache --refresh && dnf updateinfo list security
-      register: almalinux_security_updates
+    - name: Asegurar que dnf-plugin-security esté instalado
+      package:
+        name: dnf-plugin-security
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Refrescar caché de DNF
+      shell: dnf clean all && dnf makecache --refresh
       changed_when: false
       when: ansible_facts['os_family'] == "RedHat"
 
-    - name: Actualizaciones pendientes
+    - name: Verificar actualizaciones de seguridad en AlmaLinux
+      shell: dnf updateinfo list security
+      register: almalinux_security_updates
+      changed_when: false
+      async: 120
+      poll: 10
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Guardar resumen de actualizaciones
       set_fact:
         resumen_almalinux: "{{ almalinux_security_updates.stdout_lines | select('match', '^ALSA') | list }}"
-    - name: Mostrar resumen
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Mostrar resumen de actualizaciones de seguridad (máx. 10 líneas)
       debug:
-        msg: "Se Encontraron {{ resumen_almalinux | length }} actualizaciones de seguridad."
+        msg: "{{ resumen_almalinux[:10] }}"
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Confirmar finalización del análisis
+      debug:
+        msg: "✅ Verificación de actualizaciones de seguridad en AlmaLinux terminada."
+      when: ansible_facts['os_family'] == "RedHat"  
   
     - name: Aplicar actualizaciones de seguridad
       shell: dnf update --security -y
