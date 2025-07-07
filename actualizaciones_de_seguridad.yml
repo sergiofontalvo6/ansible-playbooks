@@ -25,7 +25,7 @@
     # Ubuntu
     # --------------------
     - name: Verificar actualizaciones de seguridad en Ubuntu
-      shell: unattended-upgrade --dry-run -d | grep -E '^Inst.*security'
+      shell: unattended-upgrade --dry-run -d | grep -E '^Inst' | grep security
       register: ubuntu_security_updates
       changed_when: false
       when: ansible_facts['os_family'] == "Debian"
