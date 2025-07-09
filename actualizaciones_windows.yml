@@ -2,6 +2,8 @@
 - name: Seleccionar actualizaciones específicas en Windows
   hosts: all
   gather_facts: no
+  collections:
+    - ansible.windows
 
   vars:
     # Puedes pasar esto por AWX como extra_vars (ejemplo: ["KB5039302", "KB5036992"])
