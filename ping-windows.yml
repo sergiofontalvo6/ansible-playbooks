@@ -1,0 +1,8 @@
+---
+- name: Probar conexión con Windows
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Hacer ping a host Windows
+      ansible.windows.win_ping:
