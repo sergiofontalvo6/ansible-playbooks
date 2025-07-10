@@ -12,7 +12,7 @@
   tasks:
 
     - name: Buscar actualizaciones disponibles
-      win_wua:
+      win_updates:
         state: searched
       register: actualizaciones_disponibles
 
@@ -38,7 +38,7 @@
           {{ updates_filtradas | map(attribute='title') | list }}
 
     - name: Instalar actualizaciones seleccionadas
-      win_wua:
+      win_updates:
         updates: "{{ updates_filtradas }}"
         state: installed
         reboot: false
