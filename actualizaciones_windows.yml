@@ -1,29 +1,55 @@
 ---
-- name: Buscar e instalar actualizaciones seleccionadas
+- name: Buscar e instalar actualizaciones en Windows manualmente
   hosts: all
   gather_facts: no
-  vars:
-    categorias_instalacion:
-      - SecurityUpdates
-      - CriticalUpdates
+  vars_prompt:
+    - name: "instalar_kbs"
+      prompt: "Escriba los KBs que desea instalar separados por coma (ej. KB5011234,KB5023456), o déjelo vacío para no instalar nada"
+      private: no
+
   tasks:
 
     - name: Buscar actualizaciones disponibles
-      ansible.windows.win_updates:
-        category_names: "{{ categorias_instalacion }}"
+      community.windows.win_updates:
+        category_names: []
         state: searched
       register: actualizaciones_disponibles
+
+    - name: Validar si hay actualizaciones encontradas
+      debug:
+        msg: "No se encontraron actualizaciones."
+      when: actualizaciones_disponibles.updates is not defined or actualizaciones_disponibles.updates | length == 0
+
+    - name: Mostrar lista ordenada de actualizaciones encontradas
       debug:
         msg: >-
-          {% for update in actualizaciones_disponibles.updates | default([]) %}
-          - Título: {{ update.title() }}
-            KB: {{ update.kb_article_ids | default([]) | join(', ') }}
+          {% for item in actualizaciones_disponibles.updates %}
+          - Título: {{ item.title() }}
+            KB: {{ item.kb_article_ids | join(', ') if item.kb_article_ids is defined and item.kb_article_ids | length > 0 else 'No aplica' }}
           {% endfor %}
       when: actualizaciones_disponibles.updates is defined and actualizaciones_disponibles.updates | length > 0
 
-    - name: Instalar actualizaciones seleccionadas (por KB)
-      ansible.windows.win_updates:
-        category_names: "{{ categorias_instalacion }}"
-        kb_article_ids: "{{ kb_a_instalar }}"
-        reboot: true
-      when: kb_a_instalar is defined
+    - name: Separar lista de KBs ingresados
+      set_fact:
+        kbs_filtradas: "{{ instalar_kbs.split(',') | map('trim') | list }}"
+      when: instalar_kbs | length > 0
+
+    - name: Filtrar actualizaciones por KB ingresado
+      set_fact:
+        actualizaciones_a_instalar: >-
+          {{ actualizaciones_disponibles.updates | selectattr('kb_article_ids', 'defined')
+            | selectattr('kb_article_ids', 'select', kbs_filtradas)
+            | list }}
+      when: instalar_kbs | length > 0
+
+    - name: Instalar actualizaciones seleccionadas
+      community.windows.win_updates:
+        category_names: []
+        state: installed
+        updates: "{{ actualizaciones_a_instalar }}"
+      when: instalar_kbs | length > 0
+
+    - name: Mensaje si no se instalaron actualizaciones
+      debug:
+        msg: "No se seleccionaron actualizaciones para instalar."
+      when: instalar_kbs | length == 0
