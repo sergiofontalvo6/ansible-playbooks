@@ -6,7 +6,6 @@
     - ansible.windows
 
   vars:
-    # Puedes pasar esto por AWX como extra_vars (ejemplo: ["KB5039302", "KB5036992"])
     actualizaciones_a_instalar: []
 
   tasks:
@@ -16,24 +15,25 @@
         state: searched
       register: actualizaciones_disponibles
 
-     - name: Ver estructura de actualizaciones_disponibles.updates
-       debug:
-         var: actualizaciones_disponibles.updates
+    - name: Ver estructura de actualizaciones_disponibles.updates
+      debug:
+        var: actualizaciones_disponibles.updates
 
     - name: Mostrar todas las actualizaciones encontradas
       debug:
-        msg: |
-          Actualizaciones disponibles:
+        msg: >
           {% for update in actualizaciones_disponibles.updates %}
           - Título: {{ update.title }}
-            KB: {{ update.kb_article_ids | join(', ') if update.kb_article_ids else 'N/A' }}
+            KB: {{ update.kb_article_ids | join(', ') if update.kb_article_ids is defined else 'N/A' }}
           {% endfor %}
 
     - name: Filtrar actualizaciones seleccionadas por KB
       set_fact:
         updates_filtradas: >-
-          {{ actualizaciones_disponibles.updates | selectattr('kb_article_ids', 'defined') 
-            | selectattr('kb_article_ids', 'intersect', actualizaciones_a_instalar) | list }}
+          {{ actualizaciones_disponibles.updates
+             | selectattr('kb_article_ids', 'defined')
+             | selectattr('kb_article_ids', 'intersect', actualizaciones_a_instalar)
+             | list }}
 
     - name: Mostrar actualizaciones que se instalarán
       debug:
@@ -43,18 +43,5 @@
 
     - name: Instalar actualizaciones seleccionadas
       win_updates:
-        updates: "{{ updates_filtradas }}"
         state: installed
-        reboot: false
-      when: updates_filtradas | length > 0
-
-    - name: Verificar si se requiere reinicio
-      win_reboot:
-        test_command: 'powershell.exe -Command "(Get-ItemProperty ''HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'').RebootRequired -ne $null"'
-      register: necesita_reboot
-      ignore_errors: true
-
-    - name: Mostrar si se requiere reinicio
-      debug:
-        msg: >
-          {{ 'Se requiere reinicio del sistema.' if necesita_reboot.reboot_required else 'No se requiere reinicio.' }}
+        updates: "{{ updates_filtradas }}"
