@@ -13,8 +13,6 @@
         category_names: "{{ categorias_instalacion }}"
         state: searched
       register: actualizaciones_disponibles
-
-    - name: Mostrar lista de actualizaciones encontradas
       debug:
         msg: >-
           {% for update in actualizaciones_disponibles.updates | default([]) %}
