@@ -16,6 +16,10 @@
         state: searched
       register: actualizaciones_disponibles
 
+     - name: Ver estructura de actualizaciones_disponibles.updates
+       debug:
+         var: actualizaciones_disponibles.updates
+
     - name: Mostrar todas las actualizaciones encontradas
       debug:
         msg: |
