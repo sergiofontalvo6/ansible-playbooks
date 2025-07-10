@@ -1,49 +1,35 @@
 ---
-- name: Seleccionar actualizaciones específicas en Windows
+- name: Buscar e instalar actualizaciones seleccionadas
   hosts: all
   gather_facts: no
-  collections:
-    - ansible.windows
-
   vars:
-    actualizaciones_a_instalar: []
-
+    categorias_instalacion:
+      - SecurityUpdates
+      - CriticalUpdates
   tasks:
 
     - name: Buscar actualizaciones disponibles
-      win_updates:
+      ansible.windows.win_updates:
+        category_names: "{{ categorias_instalacion }}"
         state: searched
       register: actualizaciones_disponibles
 
-    - name: Ver estructura de actualizaciones_disponibles.updates
-      debug:
-        var: actualizaciones_disponibles.updates[0]
-
-    - name: Mostrar todas las actualizaciones encontradas
+    - name: Mostrar lista de actualizaciones encontradas
       debug:
         msg: |
           {% for update in actualizaciones_disponibles.updates %}
-          - {{ update }}
+          - Título: {{ update.title }}
+            KB: {{ update.kb_article_ids | join(', ') }}
           {% endfor %}
 
-
-    - name: Filtrar actualizaciones seleccionadas por KB
-      set_fact:
-        updates_filtradas: >-
-          {{ actualizaciones_disponibles.updates
-             | selectattr('kb_article_ids', 'defined')
-             | selectattr('kb_article_ids', 'intersect', actualizaciones_a_instalar)
-             | list }}
-
-    - name: Mostrar actualizaciones que se instalarán
+    - name: Validar si hay actualizaciones encontradas
       debug:
-        msg: >
-          Se instalarán las siguientes actualizaciones:
-          {{ updates_filtradas | map(attribute='title') | list }}
+        msg: "No hay actualizaciones disponibles."
+      when: actualizaciones_disponibles.updates | length == 0
 
-    - name: Instalar actualizaciones por KB específicas
-      win_updates:
-        category_names:
-          - SecurityUpdates
-        kb_article_ids: "{{ actualizaciones_a_instalar }}"
-        state: installed
+    - name: Instalar actualizaciones seleccionadas (por KB)
+      ansible.windows.win_updates:
+        category_names: "{{ categorias_instalacion }}"
+        kb_article_ids: "{{ kb_a_instalar }}"
+        reboot: true
+      when: kb_a_instalar is defined
