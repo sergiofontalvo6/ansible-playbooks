@@ -17,15 +17,15 @@
 
     - name: Ver estructura de actualizaciones_disponibles.updates
       debug:
-        var: actualizaciones_disponibles.updates
+        var: actualizaciones_disponibles.updates[0]
 
     - name: Mostrar todas las actualizaciones encontradas
       debug:
-        msg: >
+        msg: |
           {% for update in actualizaciones_disponibles.updates %}
-          - Título: {{ update.title }}
-            KB: {{ update.kb_article_ids | join(', ') if update.kb_article_ids is defined else 'N/A' }}
+          - {{ update }}
           {% endfor %}
+
 
     - name: Filtrar actualizaciones seleccionadas por KB
       set_fact:
@@ -41,7 +41,9 @@
           Se instalarán las siguientes actualizaciones:
           {{ updates_filtradas | map(attribute='title') | list }}
 
-    - name: Instalar actualizaciones seleccionadas
+    - name: Instalar actualizaciones por KB específicas
       win_updates:
+        category_names:
+          - SecurityUpdates
+        kb_article_ids: "{{ actualizaciones_a_instalar }}"
         state: installed
-        updates: "{{ updates_filtradas }}"
