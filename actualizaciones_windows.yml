@@ -14,13 +14,20 @@
         state: searched
       register: actualizaciones_disponibles
 
+    - name: No se encontraron actualizaciones
+      debug:
+        msg: "No hay actualizaciones disponibles para instalar."
+      when: actualizaciones_disponibles.updates is not defined or actualizaciones_disponibles.updates | length == 0
+
     - name: Mostrar lista de actualizaciones encontradas
       debug:
         msg: |
-          {% for update in actualizaciones_disponibles.updates %}
-          - Título: {{ update.title }}
-            KB: {{ update.kb_article_ids | join(', ') }}
+          {% for update in actualizaciones_disponibles.updates | default([]) %}
+          - Título: {{ update.title | default('Sin título') }}
+          KB: {{ update.kb_article_ids | default([]) | join(', ') }}
           {% endfor %}
+      when: actualizaciones_disponibles.updates is defined and actualizaciones_disponibles.updates | length > 0
+
 
     - name: Validar si hay actualizaciones encontradas
       debug:
