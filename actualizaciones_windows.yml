@@ -6,6 +6,13 @@
     # El usuario puede dejar esta lista vacía si solo desea listar sin instalar
     kb_a_instalar: []
   tasks:
+    
+    - name: Buscar todas las actualizaciones disponibles (modo búsqueda segura)
+      ansible.windows.win_updates:
+        state: searched
+        search_only: yes
+      register: actualizaciones_disponibles
+
 
     - name: Buscar todas las actualizaciones disponibles (no solo de seguridad)
       ansible.windows.win_updates:
@@ -31,7 +38,7 @@
       ansible.windows.win_updates:
         category_names: []
         kb_article_ids: "{{ kb_a_instalar }}"
-        reboot: true
+        reboot: false
       when:
         - actualizaciones_disponibles.updates is defined
         - actualizaciones_disponibles.updates | length > 0
