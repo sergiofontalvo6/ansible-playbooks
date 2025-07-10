@@ -21,11 +21,11 @@
 
     - name: Mostrar lista de actualizaciones encontradas
       debug:
-        msg: |
-          {% for update in actualizaciones_disponibles.updates | default([]) %}
-          - Título: {{ update['title'] | default('Sin título') }}
-            KB: {{ update['kb_article_ids'] | default([]) | join(', ') }}
-          {% endfor %}
+      msg: >-
+	{% for update in actualizaciones_disponibles.updates | default([]) %}
+	- Título: {{ update.title() }}
+	  KB: {{ update.kb_article_ids | default([]) | join(', ') }}
+	{% endfor %}
       when: actualizaciones_disponibles.updates is defined and actualizaciones_disponibles.updates | length > 0
 
 
