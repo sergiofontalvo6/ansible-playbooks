@@ -4,7 +4,7 @@
   gather_facts: no
   vars:
     # El usuario puede dejar esta lista vacía si solo desea listar sin instalar
-    # este es un comentario de prueba
+    # este es un comentario de prueba desde mi pc virtual
     kb_a_instalar: []
   tasks:
     
