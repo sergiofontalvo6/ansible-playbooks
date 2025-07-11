@@ -1,45 +1,21 @@
 ---
-- name: Buscar e instalar actualizaciones seleccionadas
+- name: Listar actualizaciones pendientes en Windows
   hosts: all
   gather_facts: no
-  vars:
-    # El usuario puede dejar esta lista vacía si solo desea listar sin instalar
-    # este es un comentario de prueba desde mi pc virtual
-    kb_a_instalar: []
   tasks:
-    
-    - name: Buscar todas las actualizaciones disponibles (modo búsqueda segura)
+
+    - name: Buscar actualizaciones disponibles (todas las categorías)
       ansible.windows.win_updates:
         state: searched
       register: actualizaciones_disponibles
-    
-    - name: Listar actualizaciones disponibles
+
+    - name: Mostrar lista de actualizaciones encontradas
       debug:
         msg: >-
           {% for update in actualizaciones_disponibles.updates | default([]) %}
           - Título: {{ update.title }}
             KB: {{ update.kb_article_ids | default([]) | join(', ') }}
+          {% else %}
+          No hay actualizaciones disponibles.
           {% endfor %}
-    - name: Listar actualizaciones disponibles
-      debug:
-        msg: >-
-          {% for update in actualizaciones_disponibles.updates | default([]) %}
-          - Título: {{ update.title }}
-            KB: {{ update.kb_article_ids | default([]) | join(', ') }}
-          {% endfor %}
-      when: actualizaciones_disponibles.updates is defined and actualizaciones_disponibles.updates | length > 0
-
-    - name: Validar si hay actualizaciones encontradas
-      debug:
-        msg: "No se encontraron actualizaciones."
-      when: actualizaciones_disponibles.updates is not defined or actualizaciones_disponibles.updates | length == 0
-
-    - name: Instalar actualizaciones seleccionadas (por KB)
-      ansible.windows.win_updates:
-        category_names: []
-        kb_article_ids: "{{ kb_a_instalar }}"
-        reboot: false
-      when:
-        - actualizaciones_disponibles.updates is defined
-        - actualizaciones_disponibles.updates | length > 0
-        - kb_a_instalar | length > 0
+      when: actualizaciones_disponibles.updates is defined
