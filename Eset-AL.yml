@@ -34,7 +34,7 @@
     - name: Copiar script desde 192.193.1.241 al host actual
       fetch:
         src: /home/ansible/PROTECTAgentInstaller.sh
-        dest: /home/ansible/
+        dest: /tmp/
         flat: yes
       delegate_to: 192.193.1.241
       become: false
