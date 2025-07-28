@@ -5,7 +5,7 @@
 
   vars:
     remote_host: 192.193.1.241
-    remote_user: sbxalocal
+    remote_user: ansible
     remote_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
     local_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
 
