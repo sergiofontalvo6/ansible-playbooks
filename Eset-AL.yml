@@ -6,7 +6,7 @@
   vars:
     remote_host: 192.193.1.241
     remote_script_path: /home/ansible/PROTECTAgentInstaller.sh
-    local_script_path: /home/ansible/PROTECTAgentInstaller.sh
+    local_script_path: /tmp/PROTECTAgentInstaller.sh
 
   tasks:
 
