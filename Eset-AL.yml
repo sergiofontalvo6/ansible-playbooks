@@ -1,0 +1,48 @@
+---
+- name: Instalar Protect Agent y configurar entorno
+  hosts: all
+  become: yes
+
+  vars:
+    remote_host: 192.193.1.241
+    remote_user: sbxalocal
+    remote_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
+    local_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
+
+  tasks:
+
+    - name: Instalar policycoreutils-devel
+      dnf:
+        name: policycoreutils-devel
+        state: present
+
+    - name: Abrir puertos 2222/tcp y 3128/tcp en el firewall
+      firewalld:
+        port: "{{ item }}/tcp"
+        permanent: true
+        state: enabled
+        immediate: yes
+      loop:
+        - 2222
+        - 3128
+
+    - name: Asegurar que firewalld esté activo
+      systemd:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Copiar script desde el servidor remoto
+      ansible.builtin.command: >
+        scp {{ remote_user }}@{{ remote_host }}:{{ remote_script_path }} {{ local_script_path }}
+      register: copy_result
+      changed_when: "'No such file' not in copy_result.stderr"
+
+    - name: Dar permisos de ejecución al script
+      file:
+        path: "{{ local_script_path }}"
+        mode: '0755'
+        state: file
+
+    - name: Ejecutar el script
+      command: "{{ local_script_path }}"
