@@ -5,8 +5,8 @@
 
   vars:
     remote_host: 192.193.1.241
-    remote_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
-    local_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
+    remote_script_path: /home/ansible/PROTECTAgentInstaller.sh
+    local_script_path: /home/ansible/PROTECTAgentInstaller.sh
 
   tasks:
 
@@ -33,7 +33,7 @@
 
     - name: Copiar script desde 192.193.1.241 al host actual
       fetch:
-        src: /home/sbxalocal/PROTECTAgentInstaller.sh
+        src: /home/ansible/PROTECTAgentInstaller.sh
         dest: /home/ansible/
         flat: yes
       delegate_to: 192.193.1.241
