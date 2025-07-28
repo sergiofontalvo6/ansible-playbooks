@@ -5,7 +5,6 @@
 
   vars:
     remote_host: 192.193.1.241
-    remote_user: ansible
     remote_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
     local_script_path: /home/sbxalocal/PROTECTAgentInstaller.sh
 
@@ -32,11 +31,15 @@
         state: started
         enabled: true
 
-    - name: Copiar script desde el servidor remoto
-      ansible.builtin.command: >
-        scp {{ remote_user }}@{{ remote_host }}:{{ remote_script_path }} {{ local_script_path }}
-      register: copy_result
-      changed_when: "'No such file' not in copy_result.stderr"
+    - name: Copiar script desde 192.193.1.241 al host actual
+      fetch:
+        src: /home/sbxalocal/PROTECTAgentInstaller.sh
+        dest: /home/sbxalocal/
+        flat: yes
+      delegate_to: 192.193.1.241
+      become: false
+      remote_user: ansible
+
 
     - name: Dar permisos de ejecución al script
       file:
